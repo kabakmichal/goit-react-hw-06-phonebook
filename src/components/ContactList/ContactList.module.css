@@ -1,0 +1,43 @@
+.list {
+  list-style: inside;
+  margin-left: 25px;
+}
+
+.item:not(:last-child) {
+  margin-bottom: 10px;
+}
+
+.paragraph {
+  margin-right: 10px;
+}
+
+.btn {
+  background-color: #fafbfc;
+  border: 1px solid rgba(27, 31, 35, 0.15);
+  border-radius: 6px;
+  box-shadow: rgba(27, 31, 35, 0.04) 0 1px 0,
+    rgba(255, 255, 255, 0.25) 0 1px 0 inset;
+  color: #24292e;
+  cursor: pointer;
+  font-size: 12px;
+  display: inline-block;
+  list-style: none;
+  padding: 1px 10px;
+  position: relative;
+  transition: background-color 0.2s cubic-bezier(0.3, 0, 0.5, 1);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.btn:hover {
+  background-color: #f3f4f6;
+  text-decoration: none;
+  transition-duration: 0.1s;
+}
+
+.btn:active {
+  background-color: #edeff2;
+  box-shadow: rgba(225, 228, 232, 0.2) 0 1px 0 inset;
+  transition: none 0s;
+}
