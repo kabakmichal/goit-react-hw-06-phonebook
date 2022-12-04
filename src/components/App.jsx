@@ -1,111 +1,95 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { nanoid } from 'nanoid';
 import { ContactForm } from './ContactForm';
 import { ContactList } from './ContactList';
 import { Filter } from './Filter';
 
-const INITIAL_STATE = {
-  contacts: [
-    { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-    { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-    { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-    { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-  ],
-  filter: '',
-};
-
-export class App extends React.Component {
-  state = {
-    contacts: [],
-    filter: '',
-  };
-
-  componentDidMount() {
+export const App = () => {
+  const [contacts, setContacts] = useState(() => {
     const json = localStorage.getItem('contacts');
-    if (json == null) {
-      localStorage.setItem('contacts', JSON.stringify(INITIAL_STATE.contacts));
+    if (json === null) {
+      localStorage.setItem(
+        'contacts',
+        JSON.stringify([
+          { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
+          { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
+          { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
+          { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
+        ])
+      );
+
+      const parseBegin = JSON.parse(localStorage.getItem('contacts'));
+      return parseBegin;
     } else {
       const parseContacts = JSON.parse(json);
-      this.setState({ contacts: parseContacts });
+      return parseContacts;
     }
-  }
+  });
+  const [filter, setFilter] = useState('');
 
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.contacts.length !== this.state.contacts.length) {
-      const newContacts = this.state.contacts;
-      const json = JSON.stringify(newContacts);
-      localStorage.setItem('contacts', json);
-    }
-  }
+  useEffect(() => {
+    const newContacts = contacts;
+    const json = JSON.stringify(newContacts);
+    localStorage.setItem('contacts', json);
+  }, [contacts]);
 
-  handleSubmit = event => {
-    event.preventDefault();
-    const form = event.currentTarget;
+  const handleSubmit = e => {
+    e.preventDefault();
+    const form = e.currentTarget;
     const name = form.elements.name.value;
     const number = form.elements.number.value;
     const newContact = { id: nanoid(6), name: name, number: number };
-    const namesArray = this.state.contacts.map(({ name }) => name);
-    if (namesArray.includes(name)) {
+    const nameArray = contacts.map(({ name }) => name);
+    if (nameArray.includes(name)) {
       alert(`${name} is already in contacts.`);
     } else {
-      this.setState(({ contacts }) => ({
-        contacts: [...contacts, newContact],
-      }));
+      setContacts(oldContacts => [...oldContacts, newContact]);
       form.reset();
     }
   };
 
-  handleChange = event => {
-    const { name, value } = event.target;
-    this.setState({ [name]: value });
+  const handleChange = e => {
+    setFilter(e.target.value);
   };
 
-  fooFilter = () => {
-    const newArray = this.state.contacts.filter(contact => {
-      const valueToLow = this.state.filter.toLowerCase();
+  const onFilter = () => {
+    const newArray = contacts.filter(contact => {
+      const valueToLow = filter.toLowerCase();
       return contact.name.toLowerCase().includes(valueToLow);
     });
     return newArray;
   };
 
-  fooDelete = contactID => {
-    const index = this.state.contacts.findIndex(
-      contact => contact.id === contactID
-    );
-    const genNewElement = () => {
-      const array = this.state.contacts;
-      let newArray = [];
-      for (const element of array) {
-        if (array.indexOf(element) !== index) {
-          newArray.push(element);
-        }
+  const onDelete = contactID => {
+    const index = contacts.findIndex(contact => contact.id === contactID);
+    for (const element of contacts) {
+      if (contacts.indexOf(element) !== index) {
+        setContacts(contacts.filter((contact, ind) => ind !== index));
+      } else {
+        setContacts([]);
       }
-      return newArray;
-    };
-    this.setState(({ contacts }) => ({ contacts: genNewElement() }));
+    }
   };
 
-  render() {
-    return (
-      <div
-        style={{
-          height: '100%',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'flex-start',
-          flexDirection: 'column',
-          fontSize: 20,
-          color: 'black',
-          padding: '20px 10px',
-        }}
-      >
-        <h1>Phonebook</h1>
-        <ContactForm handleSubmit={this.handleSubmit} />
+  return (
+    <div
+      style={{
+        height: '100%',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+        flexDirection: 'column',
+        fontSize: 20,
+        color: 'black',
+        padding: '20px 10px',
+      }}
+    >
+      <h1>Phonebook</h1>
+      <ContactForm handleSubmit={handleSubmit} />
 
-        <h2>Contacts</h2>
-        <Filter value={this.state.filter} handleChange={this.handleChange} />
-        <ContactList onDelete={this.fooDelete} filterArray={this.fooFilter} />
-      </div>
-    );
-  }
-}
+      <h2>Contacts</h2>
+      <Filter value={filter} handleChange={handleChange} />
+      <ContactList onDelete={onDelete} filterArray={onFilter} />
+    </div>
+  );
+};
