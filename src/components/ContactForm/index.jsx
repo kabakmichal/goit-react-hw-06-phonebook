@@ -1,11 +1,28 @@
 import styles from './ContactForm.module.css';
 import React from 'react';
-import PropTypes from 'prop-types';
-
 import { nanoid } from 'nanoid';
+import { useDispatch, useSelector } from 'react-redux';
+import { addContact } from 'redux/contacts/contactSlice';
+import { getItems } from 'redux/contacts/selectors';
+import { findAllInRenderedTree } from 'react-dom/test-utils';
 
-export const ContactForm = ({ handleSubmit }) => {
+export const ContactForm = () => {
   let elementId = nanoid();
+  const dispatch = useDispatch();
+  const items = useSelector(getItems);
+
+  const handleSubmit = e => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const name = form.elements.name.value;
+    const number = form.elements.number.value;
+    const nameArray = items.map(item => item.name);
+    if (nameArray.includes(name)) {
+      return findAllInRenderedTree(`${name} is already in contacts`);
+    }
+    dispatch(addContact(name, number));
+    form.reset();
+  };
 
   return (
     <form className={styles.form} htmlFor={elementId} onSubmit={handleSubmit}>
@@ -38,8 +55,4 @@ export const ContactForm = ({ handleSubmit }) => {
       </button>
     </form>
   );
-};
-
-ContactForm.propTypes = {
-  handleSubmit: PropTypes.func.isRequired,
 };

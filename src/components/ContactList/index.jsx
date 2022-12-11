@@ -1,28 +1,29 @@
 import styles from './ContactList.module.css';
-import PropTypes from 'prop-types';
+import { Contact } from 'components/Contact';
+import { useSelector } from 'react-redux';
+import { getFilter, getItems } from 'redux/contacts/selectors';
 
-export const ContactList = ({ onDelete, filterArray }) => {
+const filteredItems = (items, filter) => {
+  if (filter === '') return items;
+  const filterArray = items.filter(item => {
+    const filtered = filter.toLowerCase();
+    return item.name.toLowerCase().includes(filtered);
+  });
+  return filterArray;
+};
+
+export const ContactList = () => {
+  const items = useSelector(getItems);
+  const filter = useSelector(getFilter);
+  const visibleItems = filteredItems(items, filter);
+
   return (
     <ul className={styles.list}>
-      {filterArray().map(contact => (
+      {visibleItems.map(contact => (
         <li key={contact.id} className={styles.item}>
-          <span className={styles.paragraph}>
-            {contact.name}: {contact.number}
-          </span>
-          <button
-            type="button"
-            className={styles.btn}
-            onClick={() => onDelete(contact.id)}
-          >
-            Delete
-          </button>
+          <Contact contact={contact} />
         </li>
       ))}
     </ul>
   );
-};
-
-ContactList.propTypes = {
-  onDelete: PropTypes.func.isRequired,
-  filterArray: PropTypes.func.isRequired,
 };
